@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load dict_tags %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <!-- Add Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa; 
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            backdrop-filter: blur(10px);
+            color: #fff;
+            height: 100vh;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 24px;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            padding: 15px;
+            text-decoration: none;
+            margin: 10px 0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px 0 0 10px;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e0f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            color: #0277bd;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        .header button {
+            background: #ff4757;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .header button:hover {
+            background: #ff6b81;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background: #f4f4f4;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0277bd;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group button:focus {
+            outline: none;
+            border-color: #6a11cb;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+        }
+
+        .form-group button {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .form-group button:hover {
+            background: #2575fc;
+        }
+
+        form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .card h4 {
+            color: #202124;
+            margin: 0;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .test-form {
+            display: none; /* Hidden by default */
+        }
+
+        .test-form.active {
+            display: block;
+        }
+
+        .quiz-header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            margin: -20px -20px 20px -20px;
+        }
+
+        .total-points {
+            font-size: 14px;
+        }
+
+        .question-form .form-group {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .question-form label {
+            display: block;
+            color: #202124;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        .question-form input[type="radio"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .score-display {
+            background: #e6f3e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            color: #202124;
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .messages li.success {
+            background: #e6f3e6;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .messages li.error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Chart Styling */
+        .chart-container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>CMPICA - CHARUSAT</h1>
+        </div>
+        <a href="#" id="testsLink" class="active">Tests</a>
+        <a href="#" id="assignmentsLink">Assignments</a>
+        <a href="#" id="viewReportLink">View Report</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h2>Student Dashboard - {{ enrollment.batch.name }} ({{ enrollment.semester.course.name }}) - {{ enrollment.semester.name }}</h2>
+            <a href="{% url 'login' %}"><button><i class="fas fa-sign-out-alt"></i> Logout</button></a>
+        </div>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <div id="testsSection" class="section active">
+            <h3>Available Tests</h3>
+            {% for test in tests %}
+            <div class="card" onclick="toggleTestForm('testForm{{ test.id }}')">
+                <h4>{{ test.subject.name }} - {{ test.title }}</h4>
+                {% if test.id|stringformat:"s" in test_scores %}
+                <!-- <p>Score: {{ test_scores|get_item:test.id|stringformat:"s"|floatformat:2 }}%</p> -->
+                {% endif %}
+            </div>
+            <form method="post" id="testForm{{ test.id }}" class="test-form">
+                {% csrf_token %}
+                <input type="hidden" name="test_id" value="{{ test.id }}">
+                <div class="quiz-header">
+                    <h2>{{ test.title }}</h2>
+                    <span class="total-points">Total points: {{ test.questions.count }}/{{ test.questions.count }}</span>
+                </div>
+                {% for question in test_questions %}
+                {% if question.test_id == test.id %}
+                <div class="question-form">
+                    <div class="form-group">
+                        <p>{{ question.question_text }} *</p>
+                        {% for option in question.options %}
+                        <label><input type="radio" name="question{{ question.id }}" value="{{ option }}" required>{{ option }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% if not test.id|stringformat:"s" in test_scores %}
+                <div class="form-group">
+                    <button type="submit">Submit</button>
+                </div>
+                {% endif %}
+                {% if test.id|stringformat:"s" in test_scores %}
+                <div class="score-display">
+                    <p>Your score: {{ test_scores|get_item:test.id|stringformat:"s"|floatformat:2 }}%</p>
+                </div>
+                {% endif %}
+            </form>
+            {% empty %}
+            <p>No tests available.</p>
+            {% endfor %}
+        </div>
+
+        <div id="assignmentsSection" class="section">
+            <h3>Assignments for Your Subjects</h3>
+            <p>Debug: {{ assignments.count }} assignments available</p>
+            {% if assignments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Title</th>
+                        <th>File</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td>{{ assignment.subject.name }}</td>
+                        <td>{{ assignment.title }}</td>
+                        <td><a href="{{ assignment.file.url }}">Download</a></td>
+                        <td>{{ assignment.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No assignments available.</p>
+            {% endif %}
+            <h3>Submit Assignment Response</h3>
+            {% if assignments %}
+            <form id="submitAssignmentResponseForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="assignment">Select Assignment:</label>
+                    <select id="assignment" name="assignment" required>
+                        {% for assignment in assignments %}
+                        <option value="{{ assignment.id }}">{{ assignment.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="responseFile">Upload Response (PDF/Word):</label>
+                    <input type="file" id="responseFile" name="responseFile" accept=".pdf,.doc,.docx" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Submit Response</button>
+                </div>
+            </form>
+            {% else %}
+            <p>No assignments available to submit.</p>
+            {% endif %}
+        </div>
+
+        <div id="viewReportSection" class="section">
+            <h2>Performance Reports</h2>
+            <div class="chart-container">
+                <h3>Test Performance Trend</h3>
+                <canvas id="testPerformanceChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Assignment and Test Performance</h3>
+                <canvas id="assignmentPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('testsLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            setActiveSection('testsSection');
+        });
+
+        document.getElementById('assignmentsLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            console.log("Assignments link clicked");
+            setActiveSection('assignmentsSection');
+        });
+
+        document.getElementById('viewReportLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            setActiveSection('viewReportSection');
+            renderCharts();
+        });
+
+        function setActiveSection(section) {
+            document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+
+            if (section === 'testsSection') {
+                document.getElementById('testsLink').classList.add('active');
+                document.getElementById('testsSection').classList.add('active');
+                document.querySelectorAll('.test-form').forEach(form => form.classList.remove('active'));
+            } else if (section === 'assignmentsSection') {
+                document.getElementById('assignmentsLink').classList.add('active');
+                document.getElementById('assignmentsSection').classList.add('active');
+            } else if (section === 'viewReportSection') {
+                document.getElementById('viewReportLink').classList.add('active');
+                document.getElementById('viewReportSection').classList.add('active');
+            }
+        }
+
+        function toggleTestForm(formId) {
+            const form = document.getElementById(formId);
+            const allForms = document.querySelectorAll('.test-form');
+            allForms.forEach(f => {
+                if (f.id !== formId) {
+                    f.classList.remove('active');
+                }
+            });
+            form.classList.toggle('active');
+        }
+
+        function renderCharts() {
+            // Test Performance Chart
+            const testData = {{ test_responses|safe }};
+            
+            const testLabels = testData.map(t => t.test_title);
+            const testScores = testData.map(t => t.score);
+
+            const testChartCtx = document.getElementById('testPerformanceChart').getContext('2d');
+            new Chart(testChartCtx, {
+                type: 'line',
+                data: {
+                    labels: testLabels,
+                    datasets: [{
+                        label: 'Test Scores (%)',
+                        data: testScores,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Score (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Test'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Assignment and Test Performance Chart
+            const assignmentData = {{ assignment_responses|safe }};
+            const assignmentLabels = assignmentData.map(a => a.assignment_title);
+            const assignmentStatuses = assignmentData.map(a => a.status === 'Done' ? 100 : 0); // 100 for Done, 0 for Pending
+
+            const assignmentChartCtx = document.getElementById('assignmentPerformanceChart').getContext('2d');
+            new Chart(assignmentChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: assignmentLabels,
+                    datasets: [
+                        {
+                            label: 'Assignment Status (Done = 100, Pending = 0)',
+                            data: assignmentStatuses,
+                            backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                            borderColor: '#2ecc71',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Test Scores (%)',
+                            data: testScores.slice(0, assignmentLabels.length), // Match length
+                            backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                            borderColor: '#3498db',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Score/Status (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Assignment'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setActiveSection('testsSection');
+        });
+    </script>
+</body>
+</html>

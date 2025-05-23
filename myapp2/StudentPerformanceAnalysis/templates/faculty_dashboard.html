@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            backdrop-filter: blur(10px);
+            color: #fff;
+            height: 100vh;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 24px;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            padding: 15px;
+            text-decoration: none;
+            margin: 10px 0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px 0 0 10px;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e0f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            color: #0277bd;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        .header button {
+            background: #ff4757;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .header button:hover {
+            background: #ff6b81;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background: #f4f4f4;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0277bd;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group button:focus {
+            outline: none;
+            border-color: #6a11cb;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+        }
+
+        .form-group button {
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .form-group button:hover {
+            background: #2575fc;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .card h3 {
+            color: #202124;
+            margin: 0;
+        }
+
+        .card i {
+            font-size: 40px;
+            color: #4285f4;
+            margin-bottom: 10px;
+        }
+
+        .create-assignment-form,
+        .create-test-form {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        .create-assignment-form.active,
+        .create-test-form.active {
+            display: block;
+        }
+
+        .quiz-header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            margin: -20px -20px 20px -20px;
+        }
+
+        .total-points {
+            font-size: 14px;
+        }
+
+        .question-form .form-group {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .question-form label {
+            display: block;
+            color: #202124;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        .question-form input[type="radio"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .question-form select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .question-form .options input[type="radio"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .question-form .options label {
+            color: #202124;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: block;
+            padding: 5px;
+        }
+
+        .question-form .answer-key {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e6f3e6;
+            border-radius: 4px;
+        }
+
+        .question-form button {
+            background-color: #4285f4;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .question-form button:hover {
+            background-color: #3267d6;
+        }
+
+        .responses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .responses-table th,
+        .responses-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .responses-table th {
+            background: #f4f4f4;
+            font-weight: 600;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .messages .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .create-test-form.active {
+            display: block;
+        }
+
+        .error-message {
+            color: #c62828;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        canvas {
+            width: 100% !important;
+            max-width: 600px;
+            height: 400px !important;
+            margin: 20px 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>CMPICA - CHARUSAT</h1>
+        </div>
+        <a href="#" id="assignmentsLink" class="active">Assignments</a>
+        <a href="#" id="testsLink">Tests</a>
+        <a href="#" id="reportsLink">Reports</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h2>Faculty Dashboard</h2>
+            <a href="{% url 'login' %}"><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></a>
+        </div>
+        <div id="assignmentsSection" class="section active">
+            <div class="card" onclick="toggleCreateAssignment()">
+                <i class="fas fa-plus"></i>
+                <h3>Create New Assignment</h3>
+            </div>
+            <div id="createAssignmentForm" class="create-assignment-form">
+                <div class="quiz-header">
+                    <h2>Create Assignment</h2>
+                </div>
+                <form id="uploadAssignmentForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <select id="subject" name="subject" required>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.semester.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentTitle">Assignment Title:</label>
+                        <input type="text" id="assignmentTitle" name="assignmentTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentFile">Upload PDF/Word Document:</label>
+                        <input type="file" id="assignmentFile" name="assignmentFile" accept=".pdf,.doc,.docx" required>
+                    </div>
+                    <button type="submit">Upload Assignment</button>
+                </form>
+            </div>
+            <div class="card" id="viewAssignmentResponsesCard" onclick="showAssignmentResponses()">
+                <h3>View Assignment Responses</h3>
+            </div>
+            <div id="assignmentResponsesSection" class="create-assignment-form">
+                <div class="quiz-header">
+                    <h2>Assignment Responses</h2>
+                </div>
+                <table id="assignmentResponsesTable" class="responses-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Assignment Title</th>
+                            <th>Response File</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in assignment_responses %}
+                        <tr>
+                            <td>{{ response.student.id }}</td>
+                            <td>{{ response.assignment.title }}</td>
+                            <td>{% if response.file %}<a href="{{ response.file.url }}">Download</a>{% else %}N/A{% endif %}</td>
+                            <td>{{ response.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="testsSection" class="section">
+            <div class="card" onclick="toggleCreateTest()">
+                <i class="fas fa-plus"></i>
+                <h3>Start a new test</h3>
+            </div>
+            <div id="createTestForm" class="create-test-form">
+                <div class="quiz-header">
+                    <h2>Create Test</h2>
+                    <span class="total-points">Total points: 0/0</span>
+                </div>
+                <form id="createTestFormElement" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="create_test" value="1">
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <select id="subject" name="subject" required>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.semester.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="testTitle">Test Title:</label>
+                        <input type="text" id="testTitle" name="testTitle" required>
+                    </div>
+                    <button type="submit">Create Test</button>
+                    <div id="createTestError" class="error-message" style="display: none;"></div>
+                </form>
+            </div>
+            <div id="addQuestionsForm" class="create-test-form {% if latest_test %}active{% endif %}">
+                <div class="quiz-header">
+                    <h2>Add Questions to {{ latest_test.title|default:"New Test" }}</h2>
+                    <span class="total-points">Total points: {{ latest_test.questions.count|default:0 }}/{{ latest_test.questions.count|default:0 }}</span>
+                </div>
+                <form id="addQuestionForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="add_question" value="1">
+                    <input type="hidden" name="test_id" id="addQuestionsTestId" value="{{ latest_test.id|default:'' }}">
+                    <div class="question-form">
+                        <div class="form-group">
+                            <label for="question_text">Question:</label>
+                            <input type="text" name="question_text" id="question_text" required>
+                        </div>
+                        <div class="form-group options">
+                            <label>Options:</label>
+                            <input type="text" name="option1" id="option1" required>
+                            <input type="text" name="option2" id="option2" required>
+                            <input type="text" name="option3" id="option3" required>
+                            <input type="text" name="option4" id="option4" required>
+                        </div>
+                        <div class="form-group answer-key">
+                            <label>Correct Answer:</label>
+                            <select name="correct_answer" id="correct_answer" required>
+                            </select>
+                        </div>
+                        <button type="submit" id="addQuestionBtn">Add Question</button>
+                    </div>
+                </form>
+                <a href="{% url 'faculty_dashboard' %}" id="finishAddingQuestions">Finish Adding Questions</a>
+                <div id="addQuestionError" class="error-message" style="display: none;"></div>
+            </div>
+            <div class="card" id="recentTestsCard">
+                <h3>Recent Tests</h3>
+                {% for test in tests %}
+                <div style="margin: 10px 0;">
+                    <a href="#" onclick="showTestResponses('{{ test.id }}')">{{ test.title }}</a>
+                    <span>Opened: {{ test.created_at|date:'h:i A' }}</span>
+                </div>
+                {% empty %}
+                <p>No tests created yet.</p>
+                {% endfor %}
+            </div>
+            <div class="card" id="viewTestResponsesCard" onclick="showTestResponses()">
+                <h3>View Test Responses</h3>
+            </div>
+            <div id="testResponsesSection" class="create-test-form">
+                <div class="quiz-header">
+                    <h2>View Test Responses</h2>
+                    <span class="total-points">Total points: 1/1</span>
+                </div>
+                <table class="responses-table" id="testResponsesTable">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Response</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testResponsesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="reportsSection" class="section">
+            <h2>Reports</h2>
+            <canvas id="studentWiseChart"></canvas>
+            <canvas id="testWiseChart"></canvas>
+            <canvas id="topPerformersChart"></canvas>
+            <canvas id="leastPerformersChart"></canvas>
+            <canvas id="consistentPerformersChart"></canvas>
+            <canvas id="deterioratingPerformersChart"></canvas>
+            <canvas id="studentPerformanceChart"></canvas>
+        </div>
+    </div>
+    <script>
+        function showSection(sectionId) {
+            console.log('Showing section:', sectionId);
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+                console.log('Hiding section:', section.id);
+            });
+            const activeSection = document.getElementById(sectionId);
+            activeSection.style.display = 'block';
+            console.log('Activated section:', sectionId);
+            document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active'));
+            document.querySelector(`#${sectionId === 'assignmentsSection' ? 'assignmentsLink' : sectionId === 'testsSection' ? 'testsLink' : 'reportsLink'}`).classList.add('active');
+        }
+
+        document.getElementById('assignmentsLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            showSection('assignmentsSection');
+        });
+
+        document.getElementById('testsLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            showSection('testsSection');
+        });
+
+        document.getElementById('reportsLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            showSection('reportsSection');
+        });
+
+        function toggleCreateAssignment() {
+            const form = document.getElementById('createAssignmentForm');
+            form.classList.toggle('active');
+            console.log('Toggled Create Assignment form');
+        }
+
+        function showAssignmentResponses() {
+            const section = document.getElementById('assignmentResponsesSection');
+            section.classList.toggle('active');
+            console.log('Toggled Assignment Responses section');
+        }
+
+        function toggleCreateTest() {
+            const form = document.getElementById('createTestForm');
+            form.classList.toggle('active');
+            document.getElementById('addQuestionsForm').classList.remove('active');
+            console.log('Toggled Create Test form, addQuestionsForm hidden');
+        }
+
+        function updateCorrectAnswerDropdown() {
+            const optionInputs = [
+                document.getElementById('option1'),
+                document.getElementById('option2'),
+                document.getElementById('option3'),
+                document.getElementById('option4')
+            ];
+            const correctAnswerSelect = document.getElementById('correct_answer');
+            correctAnswerSelect.innerHTML = '';
+            optionInputs.forEach((input, index) => {
+                if (input.value.trim() !== '') {
+                    const option = document.createElement('option');
+                    option.value = input.value;
+                    option.textContent = `Option ${index + 1}: ${input.value}`;
+                    correctAnswerSelect.appendChild(option);
+                }
+            });
+            if (correctAnswerSelect.options.length === 0) {
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Enter options first';
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                correctAnswerSelect.appendChild(placeholder);
+            }
+        }
+
+        document.getElementById('option1').addEventListener('input', updateCorrectAnswerDropdown);
+        document.getElementById('option2').addEventListener('input', updateCorrectAnswerDropdown);
+        document.getElementById('option3').addEventListener('input', updateCorrectAnswerDropdown);
+        document.getElementById('option4').addEventListener('input', updateCorrectAnswerDropdown);
+
+        document.addEventListener('DOMContentLoaded', updateCorrectAnswerDropdown);
+
+        function showTestResponses(testId) {
+            if (testId) {
+                fetch(`/get-test-responses/${testId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.getElementById('testResponsesBody');
+                        tbody.innerHTML = '';
+                        data.responses.forEach(response => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${response.question}</td>
+                                <td>${response.answer}</td>
+                                <td>${response.score}</td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                        document.getElementById('testResponsesSection').classList.add('active');
+                        console.log('Loaded test responses for test ID:', testId);
+                    })
+                    .catch(error => console.error('Error fetching test responses:', error));
+            } else {
+                const section = document.getElementById('testResponsesSection');
+                section.classList.toggle('active');
+                console.log('Toggled Test Responses section');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, initializing dashboard');
+            showSection('assignmentsSection');
+
+            const createTestForm = document.getElementById('createTestFormElement');
+            if (createTestForm) {
+                createTestForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    console.log('Submitting Create Test form');
+                    const formData = new FormData(createTestForm);
+                    for (let [key, value] of formData.entries()) {
+                        console.log('Form data:', key, value);
+                    }
+                    fetch("{% url 'faculty_dashboard' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Server response:', data);
+                            if (data.status === 'success') {
+                                const addQuestionsForm = document.getElementById('addQuestionsForm');
+                                const testIdInput = document.getElementById('addQuestionsTestId');
+                                const quizHeader = addQuestionsForm.querySelector('.quiz-header h2');
+                                quizHeader.textContent = `Add Questions to ${data.test_title}`;
+                                testIdInput.value = data.test_id;
+                                addQuestionsForm.classList.add('active');
+                                document.getElementById('createTestForm').classList.remove('active');
+                                document.getElementById('createTestError').style.display = 'none';
+                                console.log('Activated addQuestionsForm for test:', data.test_title);
+                            } else {
+                                document.getElementById('createTestError').textContent = data.message || 'Failed to create test.';
+                                document.getElementById('createTestError').style.display = 'block';
+                                console.log('Error creating test:', data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            document.getElementById('createTestError').textContent = 'An error occurred while creating the test.';
+                            document.getElementById('createTestError').style.display = 'block';
+                        });
+                });
+            } else {
+                console.error('createTestFormElement not found in DOM');
+            }
+
+            const addQuestionForm = document.getElementById('addQuestionForm');
+            if (addQuestionForm) {
+                addQuestionForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const formData = new FormData(addQuestionForm);
+                    fetch("{% url 'faculty_dashboard' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                document.getElementById('question_text').value = '';
+                                document.getElementById('option1').value = '';
+                                document.getElementById('option2').value = '';
+                                document.getElementById('option3').value = '';
+                                document.getElementById('option4').value = '';
+                                updateCorrectAnswerDropdown();
+                                const totalPoints = document.querySelector('.total-points');
+                                const testId = document.getElementById('addQuestionsTestId').value;
+                                fetchTestQuestionCount(testId);
+                                document.getElementById('addQuestionError').style.display = 'none';
+                                console.log('Question added successfully');
+                            } else {
+                                document.getElementById('addQuestionError').textContent = data.message || 'Failed to add question.';
+                                document.getElementById('addQuestionError').style.display = 'block';
+                                console.log('Error adding question:', data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('addQuestionError').textContent = 'An error occurred while adding the question.';
+                            document.getElementById('addQuestionError').style.display = 'block';
+                        });
+                });
+            } else {
+                console.error('addQuestionForm not found in DOM');
+            }
+
+            function fetchTestQuestionCount(testId) {
+                fetch(`/get-test-question-count/${testId}/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const totalPoints = document.querySelector('.total-points');
+                        totalPoints.textContent = `Total points: ${data.count}/${data.count}`;
+                        console.log('Updated question count:', data.count);
+                    })
+                    .catch(error => console.error('Error fetching question count:', error));
+            }
+
+            function getCsrfToken() {
+                const cookieValue = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+                return cookieValue || '';
+            }
+
+            function renderCharts() {
+                console.log('Rendering charts');
+                try {
+                    const students = ['Student 1', 'Student 2', 'Student 3'];
+                    const tests = ['Test 1', 'Test 2', 'Test 3'];
+                    const scores = [85, 70, 95];
+                    const prevScores = [80, 65, 90];
+                    const topPerformers = ['Student 3'];
+                    const leastPerformers = ['Student 2'];
+                    const consistentPerformers = ['Student 1'];
+                    const deterioratingPerformers = ['Student 2'];
+
+                    new Chart(document.getElementById('studentWiseChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: students,
+                            datasets: [{
+                                label: 'Score (%)',
+                                data: scores,
+                                backgroundColor: 'rgba(103, 58, 183, 0.5)'
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Student-Wise Performance' } }
+                        }
+                    });
+
+                    new Chart(document.getElementById('testWiseChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: tests,
+                            datasets: [{
+                                label: 'Average Score (%)',
+                                data: [80, 75, 90],
+                                backgroundColor: 'rgba(103, 58, 183, 0.5)'
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Test-Wise Average Scores' } }
+                        }
+                    });
+
+                    new Chart(document.getElementById('topPerformersChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: topPerformers,
+                            datasets: [{
+                                label: 'Score (%)',
+                                data: [95],
+                                backgroundColor: 'rgba(103, 58, 183, 0.5)'
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Top Performers' } }
+                        }
+                    });
+
+                    new Chart(document.getElementById('leastPerformersChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: leastPerformers,
+                            datasets: [{
+                                label: 'Score (%)',
+                                data: [70],
+                                backgroundColor: 'rgba(103, 58, 183, 0.5)'
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Least Performers' } }
+                        }
+                    });
+
+                    new Chart(document.getElementById('consistentPerformersChart'), {
+                        type: 'line',
+                        data: {
+                            labels: ['Previous', 'Current'],
+                            datasets: [{
+                                label: 'Score (%)',
+                                data: [80, 85],
+                                borderColor: 'rgba(103, 58, 183, 1)',
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Consistent Performers' } }
+                        }
+                    });
+
+                    new Chart(document.getElementById('deterioratingPerformersChart'), {
+                        type: 'line',
+                        data: {
+                            labels: ['Previous', 'Current'],
+                            datasets: [{
+                                label: 'Score (%)',
+                                data: [65, 70],
+                                borderColor: 'rgba(103, 58, 183, 1)',
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            scales: { y: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Deteriorating Performers' } }
+                        }
+                    });
+
+                    const studentPerformanceData = [
+                        { name: 'Student 1', assignmentConsistency: 90, avgTestScore: 85 },
+                        { name: 'Student 2', assignmentConsistency: 50, avgTestScore: 60 },
+                        { name: 'Student 3', assignmentConsistency: 100, avgTestScore: 95 },
+                        { name: 'Student 4', assignmentConsistency: 70, avgTestScore: 75 },
+                        { name: 'Student 5', assignmentConsistency: 30, avgTestScore: 55 },
+                        { name: 'Student 6', assignmentConsistency: 80, avgTestScore: 80 },
+                        { name: 'Student 7', assignmentConsistency: 60, avgTestScore: 65 },
+                        { name: 'Student 8', assignmentConsistency: 95, avgTestScore: 90 },
+                        { name: 'Student 9', assignmentConsistency: 40, avgTestScore: 50 },
+                        { name: 'Student 10', assignmentConsistency: 85, avgTestScore: 88 }
+                    ];
+
+                    new Chart(document.getElementById('studentPerformanceChart'), {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: 'Student Performance',
+                                data: studentPerformanceData.map(student => ({
+                                    x: student.assignmentConsistency,
+                                    y: student.avgTestScore,
+                                    label: student.name
+                                })),
+                                backgroundColor: 'rgba(103, 58, 183, 0.7)',
+                                pointRadius: 8
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Assignment Submission Consistency (%)' },
+                                    min: 0,
+                                    max: 100
+                                },
+                                y: {
+                                    title: { display: true, text: 'Average Test Score (%)' },
+                                    min: 0,
+                                    max: 100
+                                }
+                            },
+                            plugins: {
+                                title: { display: true, text: 'Student Performance: Assignment Consistency vs Test Scores' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.raw.label}: (${context.raw.x}%, ${context.raw.y}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    console.log('Charts rendered successfully');
+                } catch (error) {
+                    console.error('Error rendering charts:', error);
+                }
+            }
+
+           
+            console.log('DOM fully loaded, rendering charts');
+                console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+                renderCharts();
+        });
+
+    </script>
+</body>
+</html>

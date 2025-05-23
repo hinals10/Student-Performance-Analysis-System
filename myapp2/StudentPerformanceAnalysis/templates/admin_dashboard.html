@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa; /* Light gray background */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            backdrop-filter: blur(10px);
+            color: #fff;
+            height: 100vh;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .logo i {
+            font-size: 24px;
+            color: #fff;
+            margin-right: 10px;
+        }
+        .logo h1 {
+            font-size: 24px;
+            color: #fff;
+        }
+        .sidebar a {
+            display: block;
+            color: #fff;
+            padding: 15px;
+            text-decoration: none;
+            margin: 10px 0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px 0 0 10px;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e0f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            color: #0277bd;
+        }
+        .header h2 {
+            margin: 0;
+        }
+        .header button {
+            background: #ff4757;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .header button:hover {
+            background: #ff6b81;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        table th {
+            background: #f4f4f4;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0277bd;
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group button:focus {
+            outline: none;
+            border-color: #6a11cb;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+        }
+        .form-group button {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .form-group button:hover {
+            background: #2575fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>CMPICA - CHARUSAT</h1>
+        </div>
+        <a href="#" id="usersLink" class="active">Users</a>
+        <a href="#" id="reportsLink">Reports</a>
+    </div>
+    <div class="content">
+        <div class="header">
+            <h2>Admin Dashboard</h2>
+            <a href="{% url 'login' %}"><button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></a>
+        </div>
+        <div id="usersSection" class="section active">
+            <h2>Users</h2>
+            <p>Manage users here.</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="subadminName">Subadmin Name:</label>
+                    <input type="text" id="subadminName" name="subadminName" required>
+                </div>
+                <div class="form-group">
+                    <label for="course">Course:</label>
+                    <select id="course" name="course" required>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="batch">Batch:</label>
+                    <input type="text" id="batch" name="batch" required placeholder="e.g., 2023">
+                </div>
+                <div class="form-group">
+                    <button type="submit">Assign Subadmin</button>
+                </div>
+            </form>
+            <h3>Subadmin Assignments</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Course</th>
+                        <th>Subadmin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for batch in batches %}
+                    <tr>
+                        <td>{{ batch.name }}</td>
+                        <td>{{ batch.course.name }}</td>
+                        <td>{{ batch.subadmin.username }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h3>Other Users</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Course</th>
+                        <th>Batch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in all_users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>
+                            {% if user.role == 'Faculty' %}
+                                {% for subject in user.subjects.all %}
+                                    {{ subject.semester.course.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Not Assigned
+                                {% endfor %}
+                            {% elif user.role == 'Student' %}
+                                {% for enrollment in user.enrollments.all %}
+                                    {{ enrollment.batch.course.name }}
+                                {% empty %}
+                                    Not Enrolled
+                                {% endfor %}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.role == 'Student' %}
+                                {% for enrollment in user.enrollments.all %}
+                                    {{ enrollment.batch.name }}
+                                {% empty %}
+                                    Not Enrolled
+                                {% endfor %}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="reportsSection" class="section" style="display: none;">
+            <h2>Reports</h2>
+            <p>View reports here.</p>
+            <canvas id="courseAvgCgpaChart"></canvas>
+            <canvas id="semesterAvgCgpaChart"></canvas>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('usersLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            setActiveSection('usersSection');
+        });
+
+        document.getElementById('reportsLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            setActiveSection('reportsSection');
+        });
+
+        function setActiveSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.classList.remove('active');
+            });
+            if (sectionId === 'usersSection') {
+                document.getElementById('usersLink').classList.add('active');
+            } else if (sectionId === 'reportsSection') {
+                document.getElementById('reportsLink').classList.add('active');
+                renderCharts();
+            }
+        }
+
+        function renderCharts() {
+            const courseAvgCgpaCtx = document.getElementById('courseAvgCgpaChart').getContext('2d');
+            const semesterAvgCgpaCtx = document.getElementById('semesterAvgCgpaChart').getContext('2d');
+
+            new Chart(courseAvgCgpaCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['BCA', 'BSCIT', 'MCA', 'MSCIT'],
+                    datasets: [{
+                        label: 'Average CGPA',
+                        data: [7.5, 8.0, 7.8, 8.2], // Example data
+                        backgroundColor: 'rgba(2, 119, 189, 0.5)',
+                        borderColor: 'rgba(2, 119, 189, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            new Chart(semesterAvgCgpaCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6'],
+                    datasets: [
+                        {
+                            label: 'BCA',
+                            data: [7.0, 7.2, 7.4, 7.6, 7.8, 8.0], // Example data
+                            borderColor: 'rgba(2, 119, 189, 1)',
+                            fill: false
+                        },
+                        {
+                            label: 'BSCIT',
+                            data: [7.5, 7.6, 7.7, 7.8, 7.9, 8.0], // Example data
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            fill: false
+                        },
+                        {
+                            label: 'MCA',
+                            data: [7.2, 7.4, 7.6, 7.8, 8.0, 8.2], // Example data
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false
+                        },
+                        {
+                            label: 'MSCIT',
+                            data: [7.8, 8.0, 8.2, 8.4, 8.6, 8.8], // Example data
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
